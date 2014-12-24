@@ -1,0 +1,22 @@
+node lb1 \
+	attributes standby="off"
+node lb2
+primitive floating ocf:openstack:FloatingVip \
+	op monitor interval="5" \
+	meta target-role="Started"
+primitive p_ping_gw ocf:pacemaker:ping \
+	params dampen="5s" attempts="2" host_list="10.43.14.1" multiplier="1000" timeout="2" \
+	op monitor interval="5s" timeout="5s"
+clone cl_ping_gw p_ping_gw \
+	meta interleave="true" clone-node-max="1" clone-max="2" target-role="Started"
+location l_ping_gw_lb1 cl_ping_gw 0: lb1
+location l_ping_gw_lb2 cl_ping_gw 0: lb2
+location loc_floating floating \
+	rule $id="loc_floating-rule" -inf: not_defined pingd or pingd number:lte 0
+property $id="cib-bootstrap-options" \
+	dc-version="1.1.7-ee0730e13d124c3d58f00016c3376a1de5323cff" \
+	cluster-infrastructure="openais" \
+	no-quorum-policy="ignore" \
+	stonith-enabled="false" \
+	last-lrm-refresh="1418856131" \
+	expected-quorum-votes="2"
