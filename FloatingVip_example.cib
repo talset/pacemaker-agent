@@ -19,4 +19,5 @@ property $id="cib-bootstrap-options" \
 	no-quorum-policy="ignore" \
 	stonith-enabled="false" \
 	last-lrm-refresh="1418856131" \
-	expected-quorum-votes="2"
+	expected-quorum-votes="2"\
+	start-failure-is-fatal="false"
