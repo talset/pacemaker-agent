@@ -2,11 +2,16 @@ node lb1 \
 	attributes standby="off"
 node lb2
 primitive floating ocf:openstack:FloatingVip \
-	op monitor interval="5" \
+	op monitor interval="5" on-fail="restart" \
 	meta target-role="Started"
 primitive p_ping_gw ocf:pacemaker:ping \
 	params dampen="5s" attempts="2" host_list="10.43.14.1" multiplier="1000" timeout="2" \
 	op monitor interval="5s" timeout="5s"
+primitive res_IPaddr2 ocf:heartbeat:IPaddr2 \
+	params ip="10.43.14.250" nic="eth0" cidr_netmask="24" \
+	op start interval="0" timeout="20" \
+	op stop interval="0" timeout="20" \
+	op monitor interval="10" timeout="20" start-delay="0"
 clone cl_ping_gw p_ping_gw \
 	meta interleave="true" clone-node-max="1" clone-max="2" target-role="Started"
 group g_vipip floating res_IPaddr2 \
