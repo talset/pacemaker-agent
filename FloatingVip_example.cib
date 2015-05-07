@@ -9,10 +9,12 @@ primitive p_ping_gw ocf:pacemaker:ping \
 	op monitor interval="5s" timeout="5s"
 clone cl_ping_gw p_ping_gw \
 	meta interleave="true" clone-node-max="1" clone-max="2" target-role="Started"
+group g_vipip floating res_IPaddr2 \
+        meta target-role="Started"
 location l_ping_gw_lb1 cl_ping_gw 0: lb1
 location l_ping_gw_lb2 cl_ping_gw 0: lb2
-location loc_floating floating \
-	rule $id="loc_floating-rule" -inf: not_defined pingd or pingd number:lte 0
+location loc_vip g_vipip \
+        rule $id="loc_vip-rule" -inf: not_defined pingd or pingd number:lte 0
 property $id="cib-bootstrap-options" \
 	dc-version="1.1.7-ee0730e13d124c3d58f00016c3376a1de5323cff" \
 	cluster-infrastructure="openais" \
